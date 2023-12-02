@@ -7,12 +7,16 @@ import re
 def parse_input(data):
     a = {}
     for line in data.strip().split("\n"):
-        game, cubes = line.split(":")
+        game, cubes = map(str.strip, line.split(":"))
 
         game = int(game.split(" ")[1])
-        cubes = re.split(r"\,|\;", cubes.strip())
-        cubes = [tuple(c.strip().split()) for c in cubes]
-        a[game] = [(int(count), color) for count, color in cubes]
+
+        b = defaultdict(int)
+        cubes = re.split(r"\,|\;", cubes)
+        for cube in cubes:
+            count, color = cube.strip().split()
+            b[color] = max(b[color], int(count))
+        a[game] = b
     return a
 
 
@@ -28,7 +32,7 @@ def part1(data):
     return sum(
         game
         for game, cubes in a.items()
-        if all(count <= maximum[color] for count, color in cubes)
+        if all(count <= maximum[color] for color, count in cubes.items())
     )
 
 
@@ -37,10 +41,7 @@ def part2(data):
 
     s = 0
     for _, cubes in a.items():
-        maximum = defaultdict(int)
-        for count, color in cubes:
-            maximum[color] = max(maximum[color], count)
-        s += reduce(operator.mul, maximum.values())
+        s += reduce(operator.mul, cubes.values())
     return s
 
 
