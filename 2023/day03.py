@@ -55,14 +55,14 @@ def part2(data):
 
         adj = find_adjacent(grid, x, y, 1)
 
-        adj_numbers = set()
+        adj_numbers = []
         for number, start in numbers:
             for nx in range(start[0], start[0] + len(str(number))):
                 if (nx, start[1]) in adj:
-                    adj_numbers.add(number)
+                    adj_numbers.append(number)
                     break
         if len(adj_numbers) == 2:
-            s += adj_numbers.pop() * adj_numbers.pop()
+            s += adj_numbers[0] * adj_numbers[1]
     return s
 
 
