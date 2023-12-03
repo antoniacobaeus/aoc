@@ -35,7 +35,7 @@ create_day () {
     if [ $day -lt 10 ]; then
         day="0${day}"
     fi
-    filename="${year}/day${day}.py"
+    filename="${year}/${day}.py"
     if [ -f "$filename" ]; then
         echo "File $filename already exists."
     else

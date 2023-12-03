@@ -72,7 +72,7 @@ if __name__ == "__main__":
     from aocd.models import Puzzle
     from aocd import submit
 
-    DAY = int(os.path.basename(__file__)[3:5])
+    DAY = int(os.path.basename(__file__).removesuffix(".py"))
     YEAR = int(os.path.basename(os.path.dirname(__file__)))
 
     puzzle = Puzzle(year=YEAR, day=DAY)
