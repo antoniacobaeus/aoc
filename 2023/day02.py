@@ -39,10 +39,7 @@ def part1(data):
 def part2(data):
     a = parse_input(data)
 
-    s = 0
-    for _, cubes in a.items():
-        s += reduce(operator.mul, cubes.values())
-    return s
+    return sum(reduce(operator.mul, cubes.values()) for _, cubes in a.items())
 
 
 if __name__ == "__main__":
@@ -69,7 +66,7 @@ if __name__ == "__main__":
     s = time.perf_counter()
     p1 = part1(data)
     print(f"Part1: {p1}, in {time.perf_counter() - s}")
-    # submit(p1, part="a", day=DAY, year=YEAR)
+    submit(p1, part="a", day=DAY, year=YEAR)
 
     # Part 2
     p2 = part2(ex.input_data)
@@ -78,4 +75,4 @@ if __name__ == "__main__":
     s = time.perf_counter()
     p2 = part2(data)
     print(f"Part2: {p2}, in {time.perf_counter() - s}")
-    # submit(p2, part="b", day=DAY, year=YEAR)
+    submit(p2, part="b", day=DAY, year=YEAR)
