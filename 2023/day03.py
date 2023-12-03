@@ -94,7 +94,9 @@ if __name__ == "__main__":
 
     # Part 2
     p2 = part2(ex.input_data)
-    assert p2 == 467835, f"Part2 does not match example, {p2} != {467835}"
+    assert (
+        str(p2) == ex.answer_b
+    ), f"Part2 does not match example, {p2} != {ex.answer_b}"
 
     s = time.perf_counter()
     p2 = part2(data)
