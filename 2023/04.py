@@ -1,43 +1,30 @@
 def parse_input(data):
-    game = {}
+    wins = []
     for line in data.strip().split("\n"):
-        g, numbers = map(str.strip, line.split(":"))
-        g = int(g.split()[1])
+        _, numbers = map(str.strip, line.split(":"))
 
         winning, numbers = numbers.split("|")
-        winning = list(map(int, winning.strip().split()))
-        numbers = list(map(int, numbers.strip().split()))
+        winning = set(map(int, winning.strip().split()))
+        numbers = set(map(int, numbers.strip().split()))
 
-        game[g] = (winning, numbers)
+        wins.append(len(winning & numbers))
 
-    return game
+    return wins
 
 
 def part1(data):
-    games = parse_input(data)
+    wins = parse_input(data)
 
-    s = 0
-    for game, (winning, numbers) in games.items():
-        g = 0
-        for number in numbers:
-            if number in winning:
-                if g == 0:
-                    g = 1
-                else:
-                    g *= 2
-        s += g
-    return s
+    return sum(2 ** (w - 1) if w > 0 else 0 for w in wins)
 
 
 def part2(data):
-    games = parse_input(data)
+    wins = parse_input(data)
 
-    cards = [1 for _ in range(len(games))]
-    for game, (winning, numbers) in games.items():
-        wins = len([n for n in numbers if n in winning])
-
-        for i in range(wins):
-            cards[game + i] += cards[game - 1]
+    cards = [1 for _ in range(len(wins))]
+    for c, w in enumerate(wins):
+        for i in range(w):
+            cards[c + i] += cards[c - 1]
     return sum(cards)
 
 
