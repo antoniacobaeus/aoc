@@ -39,8 +39,6 @@ def lookup(mappings, val):
 
 
 def solve(seeds, maps):
-    print(f"searching for {len(seeds)} seeds...")
-
     @cache
     def inner(seed, dest):
         source, dest = find_dest(maps, dest)
@@ -50,11 +48,7 @@ def solve(seeds, maps):
         r = inner(seed, source)
         return lookup(maps[(source, dest)], r)
 
-    locations = []
-    for seed in seeds:
-        print(f"searching for seed {seed}")
-        locations.append(inner(seed, "location"))
-    return min(locations)
+    return min(inner(seed, "location") for seed in seeds)
 
 
 def part1(data):
