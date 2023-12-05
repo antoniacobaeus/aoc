@@ -1,11 +1,8 @@
-from functools import cache
-
-
 def parse_input(data):
     a = []
     lines = data.strip().split("\n\n")
     seeds = list(map(int, lines[0].strip().split(":")[1].strip().split()))
-    maps = {}
+    maps: dict[(str, str), list[(range, range)]] = {}
 
     for line in lines[1:]:
         line = line.strip().split("\n")
@@ -17,38 +14,74 @@ def parse_input(data):
 
         for l in line[1:]:
             dest, source, hop = map(int, l.strip().split())
-            maps[(to, fr)].append((dest, source, hop))
+            maps[(to, fr)].append((dest - source, range(source, source + hop)))
         maps[(to, fr)] = tuple(maps[(to, fr)])
     return seeds, maps
 
 
 def find_dest(maps, dest):
-    for k, v in maps.items():
-        if dest in k:
+    for k in maps:
+        if dest == k[1]:
             return k
 
 
-@cache
 def lookup(mappings, val):
-    for d, s, h in mappings:
-        src_r = range(s, s + h)
-        if val in src_r:
-            i = src_r.index(val)  # how many hops?
-            return d + i
-    return val
+    if isinstance(val, int):
+        val = range(val, val + 1)
+
+    queue = [val]
+    ranges = []
+    while queue:
+        r = queue.pop(0)
+
+        for diff, s in mappings:
+            if r.stop <= s.start or r.start >= s.stop:
+                # r is before s or after s
+                continue
+            elif r.start < s.start and r.stop > s.stop:
+                # r covers s
+                queue.append(range(r.start, s.start))
+                queue.append(range(s.stop, r.stop))
+
+                ranges.append(range(s.start + diff, s.stop + diff))
+                break
+            elif r.start < s.start:
+                # r overflows left and is partially covered by s
+                queue.append(range(r.start, s.start))
+
+                ranges.append(range(s.start + diff, r.stop + diff))
+                break
+            elif r.stop > s.stop:
+                # r overflows right and is partially covered by s
+                queue.append(range(s.stop, r.stop))
+
+                ranges.append(range(r.start + diff, s.stop + diff))
+                break
+            else:
+                # s covers r
+                ranges.append(range(r.start + diff, r.stop + diff))
+                break
+        else:
+            ranges.append(r)
+    return ranges
 
 
 def solve(seeds, maps):
-    @cache
     def inner(seed, dest):
         source, dest = find_dest(maps, dest)
 
         if source == "seed":
             return lookup(maps[("seed", dest)], seed)
-        r = inner(seed, source)
-        return lookup(maps[(source, dest)], r)
+        ranges = []
+        res = inner(seed, source)
+        for r in res:
+            ranges.extend(lookup(maps[(source, dest)], r))
+        return ranges
 
-    return min(inner(seed, "location") for seed in seeds)
+    res = []
+    for seed in seeds:
+        res.extend(inner(seed, "location"))
+    return min(r.start for r in res)
 
 
 def part1(data):
@@ -60,7 +93,11 @@ def part1(data):
 def part2(data):
     seeds, maps = parse_input(data)
 
-    pass
+    range_seeds = []
+    for i in range(0, len(seeds), 2):
+        range_seeds.append(range(seeds[i], seeds[i] + seeds[i + 1]))
+
+    return solve(range_seeds, maps)
 
 
 if __name__ == "__main__":
@@ -96,4 +133,4 @@ if __name__ == "__main__":
     s = time.perf_counter()
     p2 = part2(data)
     print(f"Part2: {p2}, in {time.perf_counter() - s}")
-    submit(p2, part="b", day=DAY, year=YEAR)
+    # submit(p2, part="b", day=DAY, year=YEAR)
