@@ -1,46 +1,38 @@
+from functools import reduce
+
+
 def parse_input(data):
-    races = []
     time, distance = data.strip().split("\n")
 
     time = map(int, time.strip().split(":")[1].split())
     distance = map(int, distance.strip().split(":")[1].split())
 
-    races = list(zip(time, distance))
-
-    return races
+    return time, distance
 
 
 def solve(t, distance):
-    wins = 0
     for i in range(t):
         d = (t - i) * i
         if d > distance:
-            wins += 1
-    return wins
+            return t - (i * 2) + 1
 
 
 def part1(data):
-    races = parse_input(data)
+    times, distances = parse_input(data)
 
     s = 1
-    for t, d in races:
+    for t, d in zip(times, distances):
         s *= solve(t, d)
     return s
 
 
 def part2(data):
-    races = parse_input(data)
+    times, distances = parse_input(data)
 
-    ct = ""
-    cd = ""
+    t = int(reduce(lambda a, b: str(a) + str(b), times))
+    d = int(reduce(lambda a, b: str(a) + str(b), distances))
 
-    for t, d in races:
-        ct += str(t)
-        cd += str(d)
-    ct = int(ct)
-    cd = int(cd)
-
-    return solve(ct, cd)
+    return solve(t, d)
 
 
 if __name__ == "__main__":
