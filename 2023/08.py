@@ -11,20 +11,7 @@ def parse_input(data):
     return steps, a
 
 
-def solve(steps, mapping, start, end):
-    curr = 0
-    while start != end:
-        step = steps[curr % len(steps)]
-        if step == "R":
-            start = mapping[start][1]
-        elif step == "L":
-            start = mapping[start][0]
-        curr += 1
-
-    return curr
-
-
-def find_end(steps, mapping, start, ends):
+def solve(steps, mapping, start, ends):
     curr = 0
     while start not in ends:
         step = steps[curr % len(steps)]
@@ -38,20 +25,20 @@ def find_end(steps, mapping, start, ends):
 
 
 def part1(data):
-    steps, a = parse_input(data)
+    steps, mapping = parse_input(data)
 
-    return solve(steps, a, "AAA", "ZZZ")
+    return solve(steps, mapping, "AAA", ["ZZZ"])
 
 
 def part2(data):
-    steps, a = parse_input(data)
+    steps, mapping = parse_input(data)
 
-    starts = list(filter(lambda x: x.endswith("A"), a))
-    ends = list(filter(lambda x: x.endswith("Z"), a))
+    starts = list(filter(lambda x: x.endswith("A"), mapping))
+    ends = list(filter(lambda x: x.endswith("Z"), mapping))
 
-    e = [find_end(steps, a, s, ends) for s in starts]
+    cycles = [solve(steps, mapping, s, ends) for s in starts]
 
-    return lcm(*e)
+    return lcm(*cycles)
 
 
 if __name__ == "__main__":
