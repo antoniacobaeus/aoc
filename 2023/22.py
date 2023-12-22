@@ -37,6 +37,7 @@ def print_grid(grid, perspective):
 
 def build_dependency_graph(grid):
     depend = defaultdict(set)  # A: {B, C, D} means {B, C, D} depend on A
+    depend_on = defaultdict(set)  # A: {B, C, D} means A depends on {B, C, D}
 
     for x in range(len(grid)):
         for y in range(len(grid[0])):
@@ -51,7 +52,8 @@ def build_dependency_graph(grid):
                     and grid[x][y][z - 1] != grid[x][y][z]
                 ):
                     depend[grid[x][y][z - 1]].add(grid[x][y][z])
-    return depend
+                    depend_on[grid[x][y][z]].add(grid[x][y][z - 1])
+    return depend, depend_on
 
 
 def print_dependency_graph(depend):
@@ -121,8 +123,9 @@ def part1(data):
 
     grid = create_grid(bricks)
 
-    depend = build_dependency_graph(grid)
+    depend, depend_on = build_dependency_graph(grid)
     # print_dependency_graph(depend)
+    # print_dependency_graph(depend_on)
 
     s = 0
     for i, brick in enumerate(bricks):
@@ -131,29 +134,21 @@ def part1(data):
             s += 1
             continue
 
-        other_sets = set()
-        for k, v in depend.items():
-            if k != i:
-                other_sets |= v
-
-        if all(a in other_sets for a in depend[i]):
-            # print(f"{to_letter(i)} has covered dependencies")
+        if all(depend_on[d] != {i} for d in depend[i]):
             s += 1
+            # print(f"{to_letter(i)} has covered dependencies")
+
     return s
 
 
-def disintegrate(letter, depend):
+def disintegrate(letter, depend, depend_on):
     destroyed = set()
     stack = [letter]
     while stack:
         deps = depend[stack.pop()]
-        other_sets = set()
-        for k, v in depend.items():
-            if not k in destroyed and k != letter:
-                other_sets |= v
 
         for d in deps:
-            if d not in other_sets:
+            if not (depend_on[d] - (destroyed | {letter})):
                 destroyed.add(d)
                 stack.append(d)
     return destroyed
@@ -164,11 +159,13 @@ def part2(data):
 
     grid = create_grid(bricks)
 
-    depend = build_dependency_graph(grid)
+    depend, depend_on = build_dependency_graph(grid)
+    # print_dependency_graph(depend)
+    # print_dependency_graph(depend_on)
 
     s = 0
     for i, brick in enumerate(bricks):
-        disintegrated = disintegrate(i, depend)
+        disintegrated = disintegrate(i, depend, depend_on)
         # print(
         #     f"{to_letter(i)} disintegrated => {', '.join(to_letter(i) for i in disintegrated)}"
         # )
