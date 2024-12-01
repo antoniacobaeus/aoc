@@ -1,70 +1,64 @@
 const std = @import("std");
-const ArrayList = std.ArrayList;
-const Allocator = std.mem.Allocator;
-const eql = std.mem.eql;
 
-pub fn main() !void {
+fn parseInput(data: []u8) !struct { []u32, []u32 } {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
-    std.debug.print("Hello, {s}!\n", .{"World"});
 
-    var left = ArrayList(u32).init(allocator);
-    var right = ArrayList(u32).init(allocator);
+    var left = std.ArrayList(u32).init(allocator);
+    var right = std.ArrayList(u32).init(allocator);
 
-    while (true) {
-        const stdin = std.io.getStdIn().reader();
-        const bare_line = try stdin.readUntilDelimiterAlloc(
-            std.heap.page_allocator,
-            '\n',
-            8192,
-        );
+    var line_it = std.mem.split(u8, data, "\n");
 
-        if (bare_line.len == 0) {
-            break;
+    while (line_it.next()) |line| {
+        if (line.len == 0) {
+            continue;
         }
-        std.debug.print("your line {s}\n", .{bare_line});
-        defer std.heap.page_allocator.free(bare_line);
-
-        const line = std.mem.trim(u8, bare_line, "\r");
-
         var it = std.mem.split(u8, line, "   ");
-
-        const left_num = try std.fmt.parseInt(u32, it.next().?, 10);
-        try left.append(left_num);
-        const right_num = try std.fmt.parseInt(u32, it.next().?, 10);
-        try right.append(right_num);
+        const l = try std.fmt.parseInt(u32, it.next().?, 10);
+        const r = try std.fmt.parseInt(u32, it.next().?, 10);
+        try left.append(l);
+        try right.append(r);
     }
-
     const x = try left.toOwnedSlice();
     const y = try right.toOwnedSlice();
 
     std.mem.sort(u32, x, {}, comptime std.sort.asc(u32));
     std.mem.sort(u32, y, {}, comptime std.sort.asc(u32));
 
-    var p1 = @as(u64, 0);
-    for (x, 0..) |left_val, i| {
-        const right_val = y[i];
+    return .{ x, y };
+}
 
-        const diff = @abs(@as(i64, right_val) - @as(i64, left_val));
-        p1 = p1 + diff;
-
-        std.debug.print("Left: {d}, Right: {d}\n", .{ left_val, right_val });
+fn part1(left: []u32, right: []u32) u64 {
+    var res: u64 = 0;
+    for (left, right) |l, r| {
+        const diff = @abs(@as(i64, r) - @as(i64, l));
+        res = res + diff;
     }
+    return res;
+}
 
-    var p2 = @as(u64, 0);
-    for (x) |left_val| {
-        var c = @as(u64, 0);
-        for (y) |right_val| {
-            if (left_val == right_val) {
+fn part2(left: []u32, right: []u32) u64 {
+    var res: u64 = 0;
+    for (left) |l| {
+        var c: u64 = 0;
+        for (right) |r| {
+            if (l == r) {
                 c = c + 1;
             }
         }
-        p2 = p2 + left_val * c;
+        res = res + l * c;
     }
+    return res;
+}
+
+pub fn main() !void {
+    const data = @embedFile("input/2024/01.txt");
+
+    const left, const right = try parseInput(@constCast(data));
+
+    const p1 = part1(left, right);
+    const p2 = part2(left, right);
 
     std.debug.print("p1: {d}\n", .{p1});
     std.debug.print("p2: {d}\n", .{p2});
-
-    // std.mem.sort(u8, &right, std.sort.asc(u8));
-
 }
