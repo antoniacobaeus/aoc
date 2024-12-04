@@ -61,22 +61,23 @@ fn count(vals: [][]u8, x: isize, y: isize) u32 {
     return r;
 }
 
-fn is_cross(word: []u8, vals: [][]u8, x: usize, y: usize) bool {
-    if (vals[y][x] != 'A') {
+fn is_cross(word: [3]u8, vals: [][]u8, x: usize, y: usize) bool {
+    if (vals[y][x] != word[1]) {
         return false;
     }
 
     if (!(x > 0 and y > 0 and x + 1 < vals[0].len and y + 1 < vals.len)) {
         return false;
     }
+
     const tl = vals[y - 1][x - 1];
     const br = vals[y + 1][x + 1];
 
     const tr = vals[y - 1][x + 1];
     const bl = vals[y + 1][x - 1];
 
-    return ((tl == 'M' and br == 'S') or (tl == 'S' and br == 'M')) and
-        ((tr == 'M' and bl == 'S') or (tr == 'S' and bl == 'M'));
+    return ((tl == word[0] and br == word[2]) or (tl == word[2] and br == word[0])) and
+        ((tr == word[0] and bl == word[2]) or (tr == word[2] and bl == word[0]));
 }
 
 fn part1(data: []u8) !i64 {
@@ -106,7 +107,7 @@ fn part2(data: []u8) !i64 {
 
     for (0..h) |y| {
         for (0..w) |x| {
-            if (is_cross(vals, x, y)) {
+            if (is_cross("MAS".*, vals, x, y)) {
                 res += 1;
             }
         }
