@@ -1,0 +1,11 @@
+input
+
+# env
+.envrc
+.direnv
+venv
+
+# Graphviz
+*.dot
+*.svg
+doctest-output
